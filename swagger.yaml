@@ -5,7 +5,6 @@ info:
   description: 몽향 프로젝트 API 문서(개발 중)
   version: 1.0.0
 servers:
-- url: http://15.164.236.203:61234
   description: Generated server url
 tags:
 - name: 태그 조회 API

@@ -5,8 +5,11 @@ info:
   description: 몽향 프로젝트 API 문서(개발 중)
   version: 1.0.0
 servers:
+- url: http://localhost:8080
   description: Generated server url
 tags:
+- name: Qna
+  description: 1:1 문의 API
 - name: 태그 조회 API
   description: '페이지 단위: 10개'
 - name: 태그 카테고리 조회 API
@@ -19,6 +22,8 @@ tags:
   description: '장바구니 수량 유효 범위: 1 ~ 99'
 - name: 판매자 관리자용 API
   description: 양조장 및 판매자 권한을 가진 회원만 접근할 수 있습니다.
+- name: Qna Admin
+  description: 1:1 문의 관리자 API
 - name: Follow
   description: 팔로우 API
 - name: Comment
@@ -328,6 +333,149 @@ paths:
             "*/*":
               schema:
                 "$ref": "#/components/schemas/ResponseDataDtoVoid"
+  "/api/qna":
+    post:
+      tags:
+      - Qna
+      summary: 문의 등록
+      description: 1:1 문의를 등록합니다.
+      operationId: createQna
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: dto
+        in: query
+        required: true
+        schema:
+          "$ref": "#/components/schemas/ReqQnaDto"
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoResQnaDto"
+  "/api/qna/{qnaId}":
+    get:
+      tags:
+      - Qna
+      summary: 문의 상세 조회
+      description: 본인의 문의 상세 정보를 조회합니다.
+      operationId: getQnaById
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qnaId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoResQnaDto"
+    post:
+      tags:
+      - Qna
+      summary: 문의 수정
+      description: 문의를 수정합니다.
+      operationId: updateQna
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qnaId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: dto
+        in: query
+        required: true
+        schema:
+          "$ref": "#/components/schemas/ReqQnaDto"
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoResQnaDto"
+    delete:
+      tags:
+      - Qna
+      summary: 문의 삭제
+      description: 문의를 삭제합니다.
+      operationId: deleteQna
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qnaId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoVoid"
+  "/api/qna-priv/{qnaId}/answer":
+    post:
+      tags:
+      - Qna Admin
+      summary: 문의 답변 등록
+      description: 문의에 답변을 등록합니다.
+      operationId: answerQna
+      parameters:
+      - name: adminUserId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: qnaId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ReqQnaAnswerDto"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoResQnaDto"
   "/api/product-review":
     post:
       tags:
@@ -1731,6 +1879,75 @@ paths:
             "*/*":
               schema:
                 "$ref": "#/components/schemas/ResponseDataDtoPageResOrderItemForSellerDto"
+  "/api/qna/my/{page}":
+    get:
+      tags:
+      - Qna
+      summary: 나의 문의 내역 조회
+      description: 나의 문의 내역을 페이징하여 조회합니다. (10개씩)
+      operationId: getMyQnas
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: page
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoPageResponseDtoResQnaListDto"
+  "/api/qna-priv/{page}":
+    get:
+      tags:
+      - Qna Admin
+      summary: 전체 문의 목록 조회
+      description: 전체 문의 목록을 페이징하여 조회합니다. (10개씩)
+      operationId: getAllQnas
+      parameters:
+      - name: page
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoPageResponseDtoResQnaListDto"
+  "/api/qna-priv/detail/{qnaId}":
+    get:
+      tags:
+      - Qna Admin
+      summary: 문의 상세 조회
+      description: 문의 상세 정보를 조회합니다.
+      operationId: getQnaById_1
+      parameters:
+      - name: qnaId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/ResponseDataDtoResQnaDto"
   "/api/product/{productId}":
     get:
       tags:
@@ -3279,6 +3496,87 @@ components:
       - name
       - origin_price
       - volume
+    ReqQnaDto:
+      type: object
+      properties:
+        qnaTitle:
+          type: string
+        content:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+    ResQnaAnswerDto:
+      type: object
+      properties:
+        answer_id:
+          type: integer
+          format: int64
+        qna_id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    ResQnaDto:
+      type: object
+      properties:
+        qna_id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        qna_title:
+          type: string
+        content:
+          type: string
+        images:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResQnaImageDto"
+        is_complete:
+          type: boolean
+        is_deleted:
+          type: boolean
+        answer:
+          "$ref": "#/components/schemas/ResQnaAnswerDto"
+    ResQnaImageDto:
+      type: object
+      properties:
+        image_id:
+          type: integer
+          format: int64
+        qna_id:
+          type: integer
+          format: int64
+        image_key:
+          type: string
+        volume:
+          type: integer
+          format: int32
+    ResponseDataDtoResQnaDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        content:
+          "$ref": "#/components/schemas/ResQnaDto"
+    ReqQnaAnswerDto:
+      type: object
+      properties:
+        content:
+          type: string
     ReqProductReviewDto:
       type: object
       properties:
@@ -4060,6 +4358,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4072,10 +4374,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4091,6 +4389,8 @@ components:
           format: int64
         sort:
           "$ref": "#/components/schemas/Sortnull"
+        unpaged:
+          type: boolean
         paged:
           type: boolean
         pageNumber:
@@ -4099,8 +4399,6 @@ components:
         pageSize:
           type: integer
           format: int32
-        unpaged:
-          type: boolean
     ResTagDto:
       type: object
       properties:
@@ -4126,9 +4424,9 @@ components:
       properties:
         empty:
           type: boolean
-        sorted:
-          type: boolean
         unsorted:
+          type: boolean
+        sorted:
           type: boolean
     PageResTagCategoryDto:
       type: object
@@ -4139,6 +4437,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4151,10 +4453,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4189,6 +4487,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4201,10 +4503,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4282,6 +4580,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4294,10 +4596,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4408,6 +4706,53 @@ components:
           type: string
         content:
           "$ref": "#/components/schemas/PageResOrderItemForSellerDto"
+    PageResponseDtoResQnaListDto:
+      type: object
+      properties:
+        first:
+          type: boolean
+        last:
+          type: boolean
+        content:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ResQnaListDto"
+        page_number:
+          type: integer
+          format: int32
+        page_size:
+          type: integer
+          format: int32
+        total_elements:
+          type: integer
+          format: int64
+        total_pages:
+          type: integer
+          format: int32
+        is_first:
+          type: boolean
+        is_last:
+          type: boolean
+    ResQnaListDto:
+      type: object
+      properties:
+        qna_id:
+          type: integer
+          format: int64
+        qna_title:
+          type: string
+        is_complete:
+          type: boolean
+    ResponseDataDtoPageResponseDtoResQnaListDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        content:
+          "$ref": "#/components/schemas/PageResponseDtoResQnaListDto"
     ResProductDto:
       type: object
       properties:
@@ -4523,6 +4868,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4535,10 +4884,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4606,6 +4951,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4618,10 +4967,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4664,6 +5009,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4676,10 +5025,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4824,6 +5169,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4836,10 +5185,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -4893,6 +5238,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -4905,10 +5254,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
@@ -5366,6 +5711,10 @@ components:
         totalPages:
           type: integer
           format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
         size:
           type: integer
           format: int32
@@ -5378,10 +5727,6 @@ components:
           format: int32
         sort:
           "$ref": "#/components/schemas/Sortnull"
-        first:
-          type: boolean
-        last:
-          type: boolean
         numberOfElements:
           type: integer
           format: int32
